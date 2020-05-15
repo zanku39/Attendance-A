@@ -10,12 +10,13 @@ class User < ApplicationRecord
   validates :email, presence: true, length: { maximum: 100 },
                     format: { with: VALID_EMAIL_REGEX },
                     uniqueness: true
-  validates :department, length: { in: 2..50 }, allow_blank: true
-  validates :basic_time, presence: true
-  validates :work_time, presence: true
+  validates :affiliation, length: { in: 2..50 }, allow_blank: true
+  validates :basic_work_time, presence: true
+  validates :designated_work_start_time, presence: true
+  validates :designated_work_end_time, presence: true
   has_secure_password
   validates :password, presence: true, length: { minimum: 6 }, allow_nil: true
-
+ 
   # 渡された文字列のハッシュ値を返します。
   def User.digest(string)
     cost = 
@@ -48,5 +49,14 @@ class User < ApplicationRecord
   # ユーザーのログイン情報を破棄します。
   def forget
     update_attribute(:remember_digest, nil)
+  end
+  
+  
+  def self.search(search) #ここでのself.はUser.を意味する
+    if search
+      where(['name LIKE ?', "%#{search}%"]) #検索とnameの部分一致を表示。User.は省略
+    else
+      all #全て表示。User.は省略
+    end
   end
 end
