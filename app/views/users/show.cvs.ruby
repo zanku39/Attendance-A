@@ -1,5 +1,6 @@
-show.csv.ruby
 require 'csv'
+
+
 CSV.generate do |csv|
   csv << ["勤怠情報"]
   csv << []

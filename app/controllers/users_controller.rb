@@ -6,7 +6,27 @@ class UsersController < ApplicationController
   before_action :set_one_month, only: :show
   
   def index
-    @users = User.paginate(page: params[:page]).search(params[:search])
+   @users = User.all
+    respond_to do |format|
+      format.html do
+          #html用の処理を書く
+      end 
+      format.csv do
+          #csv用の処理を書く
+          send_data render_to_string, filename: "(ファイル名).csv", type: :csv
+      end
+    end
+   if params[:search]
+      @users = User.where('LOWER(name) LIKE ?', "%#{params[:search][:name].downcase}%").paginate(page: params[:page])
+   else
+      @users = User.paginate(page: params[:page])
+   end
+  end
+
+  
+  def import
+  User.import(params[:file])
+  redirect_to root_url
   end
   
 
