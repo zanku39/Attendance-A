@@ -19,7 +19,7 @@ class User < ApplicationRecord
  
   # 渡された文字列のハッシュ値を返します。
   def User.digest(string)
-    cost = 
+    cost =
       if ActiveModel::SecurePassword.min_cost
         BCrypt::Engine::MIN_COST
       else
@@ -61,19 +61,17 @@ class User < ApplicationRecord
   end
   
     #importメソッド
-  def self.import(file)
-    CSV.foreach(file.path, headers: true) do |row|
-      # IDが見つかれば、レコードを呼び出し、見つかれなければ、新しく作成
-      user = find_by(id: row["id"]) || new
-      # CSVからデータを取得し、設定する
-      user.attributes = row.to_hash.slice(*updatable_attributes)
-      user.save
+    def self.import(file)
+      CSV.foreach(file.path, headers: true) do |row|
+        user = new
+        user.attributes = row.to_hash.slice(*csv_attributes)
+        user.save!
+      end
     end
-  end
+
   
   # 更新を許可するカラムを定義
   def self.updatable_attributes
-    ["name", "email", "affiliation", "employee_number", "uid", "password", "basic_work_time",
-      "designated_work_start_time", "designated_work_end_time"]
+    ["name", "email", "affiliation", "employee_number"]
   end
 end

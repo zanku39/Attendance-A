@@ -42,7 +42,7 @@ User.create!(name: "テスト",
   email = "sample-#{n+1}@email.com"
   affiliation = "フリーランス部"
   employee_number = "#{n+1}"
-  uid = "#{n+1}",
+  uid = "#{n+1}"
   password = "password"
   User.create!(name: name,
                email: email,
