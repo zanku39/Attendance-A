@@ -31,8 +31,18 @@ class AttendancesController < ApplicationController
     redirect_to @user
   end
 
-   def edit_one_month
-   end
+  def edit_one_month
+    #csv処理
+    respond_to do |format|
+      format.html do
+        #html用の処理を書く
+      end
+      format.csv do
+        #csv用の処理を書く
+        send_data render_to_string, filename: "当月分勤怠データ.csv", type: :csv
+      end
+    end
+  end
   
   def update_one_month
     ActiveRecord::Base.transaction do # トランザクションを開始します。
@@ -53,6 +63,23 @@ class AttendancesController < ApplicationController
     redirect_to attendances_edit_one_month_user_url(date: params[:date])
   end
   
+  def edit_overtime_request
+    @user = User.find(params[:user_id])
+    @attendance = @user.attendances.find(params[:id])
+    @superior = User.where(superior: true).where.not(id: @user.id)
+  end
+  
+  def update_overtime_request
+    @user = User.find(params[:user_id])
+    @attendance = @user.attendances.find(params[:id])
+    if @attendance.update_attributes(overtime_params)
+      flash[:success] = "残業申請しました。"
+    else
+      params[:attendance][:business_outline].blank? || params[:attendance][:confirmation].blank?
+      flash[:danger] = "残業申請に失敗しました。"
+    end
+    redirect_to @user
+  end
   
   private
   
@@ -60,6 +87,10 @@ class AttendancesController < ApplicationController
     # １ヶ月分の勤怠情報を扱います。
     def attendances_params
       params.require(:user).permit(attendances: [:started_at, :finished_at, :note])[:attendances]
+    end
+    
+    def overtime_params
+      params.require(:attendance).permit(:scheduled_end_time, :next_day, :business_outline, :confirmation)
     end
     
     

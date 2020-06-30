@@ -6,6 +6,8 @@
         <li><%= link_to "トップへ", root_path %></li>
         <% if logged_in? %>
           <li><%= link_to "ユーザー一覧", users_path %></li>
+          <li><%= link_to "出勤社員一覧", users_index1_path(current_user) %></li>
+          <li><%= link_to "拠点情報の確認", offices_path(current_user) %></li>
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
               アカウント <b class="caret"></b>

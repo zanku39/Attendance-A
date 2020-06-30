@@ -52,3 +52,16 @@ User.create!(name: "テスト",
                password: password,
                password_confirmation: password)
 end
+               
+
+Office.create!(base_number: "1",
+             base: "東京",
+             work: "出勤")
+             
+Office.create!(base_number: "2",
+             base: "福岡",
+             work: "出勤")
+             
+Office.create!(base_number: "3",
+             base: "名古屋",
+             work: "出勤")

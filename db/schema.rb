@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20200508112914) do
+ActiveRecord::Schema.define(version: 20200605013135) do
 
   create_table "attendances", force: :cascade do |t|
     t.date "worked_on"
@@ -18,9 +18,22 @@ ActiveRecord::Schema.define(version: 20200508112914) do
     t.datetime "finished_at"
     t.string "note"
     t.integer "user_id"
+    t.datetime "scheduled_end_time"
+    t.boolean "next_day", default: false
+    t.string "business_outline"
+    t.string "confirmation"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_attendances_on_user_id"
+  end
+
+  create_table "offices", force: :cascade do |t|
+    t.integer "base_number"
+    t.string "base", default: "拠点A"
+    t.string "work", default: "出勤"
+    t.string "budget_d"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "users", force: :cascade do |t|
@@ -32,6 +45,12 @@ ActiveRecord::Schema.define(version: 20200508112914) do
     t.time "basic_work_time", default: "2000-01-01 23:00:00"
     t.time "designated_work_start_time", default: "2000-01-01 00:00:00"
     t.time "designated_work_end_time", default: "2000-01-01 09:00:00"
+    t.datetime "scheduled_end_time"
+    t.string "business_outline"
+    t.string "confirmation"
+    t.datetime "over_time"
+    t.boolean "change"
+    t.string "work_confirmation"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "superior", default: false

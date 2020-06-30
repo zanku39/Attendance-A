@@ -16,9 +16,22 @@ module AttendancesHelper
   def working_times(start, finish)
     format("%.2f", (((finish - start) / 60) / 60.0))
   end
+  
+  def format_hour(time)
+    format("%.2d",(time.hour))
+  end
 
   
   def format_min(time)
     format("%.2d",(((time.min)/15) * 15))
+  end
+  
+  
+  def overtime_request(scheduled_end_time, finished_at, next_day)
+    if next_day == true
+      format("%.2f", ((((scheduled_end_time.hour - finished_at.hour)*60 + (scheduled_end_time.min - finished_at.min)) / 60.0) + 24))
+    else
+      format("%.2f", ((((scheduled_end_time.hour - finished_at.hour)*60 + (scheduled_end_time.min - finished_at.min)) / 60.0)))
+    end
   end
 end

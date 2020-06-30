@@ -6,6 +6,10 @@ class CreateAttendances < ActiveRecord::Migration[5.1]
       t.datetime :finished_at
       t.string :note
       t.references :user, foreign_key: true
+      t.datetime :scheduled_end_time
+      t.boolean :next_day, default: false
+      t.string :business_outline
+      t.string :confirmation
 
       t.timestamps
     end

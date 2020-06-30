@@ -3,61 +3,81 @@
   <table class="table table-bordered table-condensed user-table">
     <tr>
       <td>
-        <%= link_to "◀️️", user_path(date: @first_day.prev_month) %>
-      　 <%= l(@first_day, format: :middle) %>時間管理表
-        <%= link_to "　▶️️️", user_path(date: @first_day.next_month) %>
+        <%= link_to "←", user_path(date: @first_day.prev_month), 
+                         class: 'btn btn-default btn-primary' %>
+        &emsp;<%= l(@first_day, format: :middle) %>&emsp;時間管理表&emsp;
+        <%= link_to "→", user_path(date: @first_day.next_month),
+                         class: 'btn btn-default btn-primary' %>
       </td>
       <td>
-        指定勤務開始時間：<%= format_basic_info(@user.designated_work_start_time) %><br>
-        指定勤務終了時間：<%= format_basic_info(@user.designated_work_end_time) %> 
+        指定勤務開始時間&emsp;<%= format_basic_info(@user.designated_work_start_time) %><br>
+        指定勤務終了時間&emsp;<%= format_basic_info(@user.designated_work_end_time) %>
       </td>
-      <td colspan = "3">基本時間：<%= format_basic_info(@user.basic_work_time) %></td>
-      <td>初日：<%= l(@first_day, format: :short) %></td>
+      <td colspan = "3">基本時間&emsp;<%= format_basic_info(@user.basic_work_time) %></td>
+      <td>初日<%= l(@first_day, format: :short) %></td>
     </tr>
 
     <tr>
-      <td>所属：<%= @user.affiliation.present? ? @user.affiliation : "未所属" %></td>
-      <td>氏名：<%= @user.name %></td>
+      <td>所属&emsp;<%= @user.affiliation.present? ? @user.affiliation : "未所属" %></td>
+      <td>氏名&emsp;<%= @user.name %></td>
       <td>コード</td>
       <td><%= @user.uid %></td>
-      <td>出勤日数：<%= @worked_sum %>日</td>
-      <td>締め：<%= l(@last_day, format: :short) %></td>
+      <td>出勤日数<%= @worked_sum %>日</td>
+      <td>締め<%= l(@last_day, format: :short) %></td>
     </tr>
   </table>
+  
+   <div class="btn-superior-edit">
+    <% if current_user.superior? %> 
+      <div>
+        <%= link_to "【 所属長承認申請のお知らせ 】", "#", class: "normal" %>
+      </div>
+      <div>
+        <%= link_to "【 勤怠変更申請のお知らせ 】", "#" %> 
+      </div>
+      <div>
+        <%= link_to "【 残業申請のお知らせ 】", "#" %> 
+      </div>
+    <% end %>
+      </div>
+
 </div>
 
 
-<div class="btn-users-show">
-  <%= link_to "勤怠を編集", attendances_edit_one_month_user_path(date: @first_day), class: "btn btn-primary"  %>
-</div>
+  <div class="btn-user-edit">
+    <%= link_to "勤怠を編集", attendances_edit_one_month_user_path(date: @first_day), class: "btn btn-primary" %>
+  
+    <%= link_to "CSV出力", user_path(@user, format: :csv), class: "btn btn-primary" %>
+  </div>
 
-<div class="btn-users-show">
-  <%= link_to "CSV出力", user_path(@user, format: :csv), class: "btn btn-primary" %>
-</div>
+  <div class="btn-user-edit">
+    <%= link_to "勤怠修正ログ（承認済）", "#", class: "btn btn-default btn-primary" %>
+  </div>
+
 
 
 <div>
   <table class="table table-bordered table-condensed table-hover" id="table-attendances">
     <thead>
       <tr>
-        <th colspan = "3"></th>
-        <th colspan = "8">【実績】</th>
-        <th colspan = "5">所定外勤務</th>
-      </tr>
-      <tr>
-        <th rowspan = "3">残業申請</th>
+        <th rowspan="2"></th>
         <th rowspan = "3">日付</th>
         <th rowspan = "3">曜日</th>
-        <th colspan = "3">出社</th>
-        <th colspan = "3">退社</th>
-        <th rowspan = "2">在社時間</th>
-        <th rowspan = "2">備考</th>
-        <th colspan = "2">終了予定時間</th>
-        <th rowspan = "2">時間外時間</th>
-        <th rowspan = "2">業務処理内容</th>
-        <th rowspan = "2">指示書確認</th>
+        <th colspan="8">【実績】</th>
+        <th colspan="5">所定外勤務</th>
       </tr>
       <tr>
+        <th colspan="3">出社</th>
+        <th colspan="3">退社</th>
+        <th rowspan="2">在社時間</th>
+        <th rowspan="2">備考</th>
+        <th colspan="2">終了予定時間</th>
+        <th rowspan="2">時間外処理</th>
+        <th rowspan="2">業務処理内容</th>
+        <th rowspan="2">指示者確認㊞</th>
+      </tr>
+      <tr>
+        <th>残業申請</th>
         <th>時</th>
         <th>分</th>
         <th></th>
@@ -75,7 +95,10 @@
     <tbody>
       <% @attendances.each do |day| %>
         <tr>
-          <td></td>
+          <td>
+            <%= link_to "残業申請", edit_overtime_request_user_attendance_path(@user, day), remote: true, class: "btn btn-sm btn-primary" %>
+              <div id="#" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+          </td>
           <td><%= l(day.worked_on, format: :short) %></td>
           <td>
             <% if day.worked_on.wday == 6 %>
@@ -85,7 +108,7 @@
             <% else %>
               <%= $days_of_the_week[day.worked_on.wday] %>
             <% end %>
-              </td>
+          </td>
           <td><%= day.started_at.hour if day.started_at.present? %></td>
           <td><%= format_min(day.started_at) if day.started_at.present? %></td>
           <td>
@@ -107,11 +130,11 @@
             <% end %>
           </td>
           <td><%= day.note %></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
+          <td><%= format_hour(day.scheduled_end_time) if day.scheduled_end_time.present? %></td>
+          <td><%= format_min(day.scheduled_end_time) if day.scheduled_end_time.present? %></td>
+          <td><%= overtime_request(day.scheduled_end_time, day.finished_at, day.next_day) if day.scheduled_end_time.present? %></td>
+          <td><%= day.business_outline %></td>
+          <td><%= day.confirmation %></td>
           
           
         </tr>
@@ -131,3 +154,6 @@
     </tfoot>    
   </table>
 </div>
+
+<!--モーダルウインドウ表示-->
+<div id="edit-overtime-request" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>

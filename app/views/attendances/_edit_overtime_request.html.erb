@@ -1,0 +1,50 @@
+<%= form_with(model: @attendance, url: update_overtime_request_user_attendance_path(@user, @attendance), local: true, method: :post) do |f| %>
+  <div class="modal-dialog modal-lg modal-dialog-center">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h1 class="modal-title">残業申請</h1>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-10 col-md-offset-1">
+            <table class="table table-bordered table-condensed table-striped user-table">
+              <thead>
+                <th>日付</th>
+                <th>曜日</th>
+                <th>終了予定時間</th>
+                <th>翌日</th>
+                <th>業務処理内容</th>
+                <th>指示者確認㊞</th>
+              </thead>
+            
+              <tbody>
+                <td><%= l(@attendance.worked_on, format: :short) %></td>
+                <td>
+                  <% if @attendance.worked_on.wday == 6 %>
+                    <font color="Blue"><%= $days_of_the_week[@attendance.worked_on.wday] %></font>
+                  <% elsif @attendance.worked_on.wday == 0 %>
+                     <font color="Red"><%= $days_of_the_week[@attendance.worked_on.wday] %></font>
+                  <% else %>
+                    <%= $days_of_the_week[@attendance.worked_on.wday] %>
+                  <% end %>
+                </td>
+                <td><%= f.time_field :scheduled_end_time, :include => true, minute_step: 15, class: "form-control" %></td>
+                <td><%= f.check_box :next_day, class: "form-control" %></td>
+                <td><%= f.text_field :business_outline, class: "form-controll" %></td>
+                <td><%= f.collection_select :confirmation, @superior, :name, :name, {include_blank: true}, {class: "form-control"} %></td>
+              </tbody>
+            </table>
+  
+  
+            <div class="center">
+              <%= f.submit "変更を送信する", class: "btn btn-lg btn-primary" %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>

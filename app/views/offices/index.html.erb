@@ -1,0 +1,39 @@
+<% provide(:title, "拠点一覧") %>
+<h1>拠点一覧</h1>
+<div>
+  <table class="table table-bordered table-condensed table-hover" id="table-attendances">
+    <thead>
+      <tr>
+        <th></th>
+        <th></th>
+        <th>拠点番号</th>
+        <th>拠点</th>
+        <th>拠点種類</th>
+      </tr>
+    </thead>
+    
+    
+    <% @offices.each do |office| %>
+      <tbody>
+        <td><%= link_to"修正", edit_office_path(office), remote: true, class: "btn btn-lg, btn-primary" %></td>
+        <td><%= link_to "削除", office, method: :delete,
+                                    data: { confirm: "削除してもよろしいですか？" },
+                                    class: "btn btn-primary btn-default" %></td>
+        <td><%= office.base_number %></td>
+        <td><%= office.base %></td>
+        <td><%= office.work %></td>
+      </tbody>
+    <% end %>
+  </table>
+  <div class="container">
+    <%= link_to"拠点情報追加", new_office_path, remote: true, class: "btn btn-lg, btn-primary" %>
+  </div>
+</div>
+
+
+<!--拠点修正のモーダルウインドウ表示-->
+<div id="edit" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>
+
+
+<!--拠点追加のモーダルウインドウ表示-->
+<div id="new" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>
