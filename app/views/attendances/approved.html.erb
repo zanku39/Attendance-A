@@ -1,0 +1,97 @@
+<% provide(:title, @user.name) %>
+
+<h1>勤怠ログ</h1>
+<div>
+  <button class="log-form" id="button">リセット</button>
+  <div id="reset"></div>
+  <script>
+    $('#button').on('click', function() {
+      $("select#year").val(<%= Date.current.year %>);
+      $("select#month").val(<%= Date.current.mon %>);
+      <% @logs.each do |day| %>
+        if (<%= Date.current.year %> == <%= day.worked_on.year %> && <%= Date.current.mon %> == <%= day.worked_on.month %>) {
+          $ ("#<%= day.id %>").show();
+        } else {
+          $ ("#<%= day.id %>").hide();
+        }
+      <% end %>
+    });
+  </script>
+  
+  <%= form_with method: :patch do |f| %>
+    <%= f.date_select :change_stated_at, { ignore_date: true, 
+      start_year: (Time.now.year)-5, end_year: (Time.now.year), discard_month: true, discard_day: true },
+      { class: 'log-form', id: 'year'} %>
+  <% end %>
+  
+  <%= form_with method: :patch do |f| %>
+    <%= f.date_select :change_stated_at, { ignore_date: true, 
+      discard_year: true, discard_day: true },
+      { class: 'log-form', id: 'month'} %>
+  <% end %>
+  
+  <script>
+    $(function() {
+      $("select#year").change(function() {
+        var yval = $(this).val();
+        <% @logs.each do |day| %>
+          var mval = $('select#month').val();
+          if (yval == <%= day.worked_on.year %> && mval == <%= day.worked_on.month %>) {
+            $("#<%= day.id %>").show();
+          } else {
+            $("#<%= day.id %>").hide();
+          }
+        <% end %>
+      });
+    });
+    $(function() {
+      $("select#month").change(function() {
+        var mval = $(this).val();
+        <% @logs.each do |day| %>
+          var yval = $('select#year').val();
+          if (yval == <%= day.worked_on.year %> && mval == <%= day.worked_on.month %>) {
+            $("#<%= day.id %>").show();
+          } else {
+            $("#<%= day.id %>").hide();
+          }
+        <% end %>
+      });
+    });
+  </script>
+      
+  <table class="table table-bordered table-condensed table-hover" id="table-attendances">
+    <thead>
+      <tr>
+        <th>日付</th>
+        <th>変更前出社時間</th>
+        <th>変更前退社時間</th>
+        <th>変更後出社</th>
+        <th>変更後退社</th>
+        <th>指示者</th>
+        <th>承認日</th>
+      </tr>
+    </thead>
+  
+    <% @logs.each do |day| %>
+      <tbody id=<%= day.id %>>
+        <tr>
+          <td><%= l(day.worked_on, format: :long) %></td>
+          <td><%= l(day.before_started_at, format: :time) if day.before_started_at.present? %></td>
+          <td><%= l(day.before_finished_at, format: :time) if day.before_finished_at.present? %></td>
+          <td><%= l(day.change_started_at, format: :time) if day.change_started_at.present? %></td>
+          <td><%= l(day.change_finished_at, format: :time) if day.change_finished_at.present? %></td>
+          <td><%= day.change_confirmation %></td>
+          <td><%= l(day.change_date, format: :long) %></td>
+        </tr>
+      </tbody>
+    <% end %>
+  </table>
+</div>
+
+<script>
+  <% @logs.each do |day| %>
+    if (<%= day.worked_on.year %> != <%= Date.current.year %> || <%= day.worked_on.mon %> != <%= Date.current.mon %>) {
+      $("#<%= day.id %>").hide();
+    }
+  <% end %>
+</script>

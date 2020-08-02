@@ -27,11 +27,27 @@ module AttendancesHelper
   end
   
   
-  def overtime_request(scheduled_end_time, finished_at, next_day)
-    if next_day == true
-      format("%.2f", ((((scheduled_end_time.hour - finished_at.hour)*60 + (scheduled_end_time.min - finished_at.min)) / 60.0) + 24))
+  def overtime_request(scheduled_end_time, designated_work_end_time, next_day, started_at)
+    if started_at.present? && ((started_at.hour > designated_work_end_time.hour) || ((started_at.hour == designated_work_end_time.hour) && (started_at.min > designated_work_end_time.min)))
+      if next_day == true
+        format("%.2f", ((((scheduled_end_time.hour - started_at.hour)*60 + (scheduled_end_time.min - started_at.min)) / 60.0) + 24))
+      else
+        format("%.2f", ((((scheduled_end_time.hour - started_at.hour)*60 + (scheduled_end_time.min - started_at.min)) / 60.0)))
+      end
     else
-      format("%.2f", ((((scheduled_end_time.hour - finished_at.hour)*60 + (scheduled_end_time.min - finished_at.min)) / 60.0)))
+      if next_day == true
+        format("%.2f", ((((scheduled_end_time.hour - designated_work_end_time.hour)*60 + (scheduled_end_time.min - designated_work_end_time.min)) / 60.0) + 24))
+      else
+        format("%.2f", ((((scheduled_end_time.hour - designated_work_end_time.hour)*60 + (scheduled_end_time.min - designated_work_end_time.min)) / 60.0)))
+      end
+    end
+  end
+  
+  def change_month(change_started_at, change_finished_at, tomorrow)
+    if tomorrow == true
+      format("%.2f", ((((change_finished_at.hour - change_started_at.hour)*60 + (change_finished_at.min - change_started_at.min)) / 60.0) + 24))
+    else
+      format("%.2f", ((((change_finished_at.hour - change_started_at.hour)*60 + (change_finished_at.min - change_started_at.min)) / 60.0)))
     end
   end
 end

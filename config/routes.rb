@@ -16,13 +16,22 @@ Rails.application.routes.draw do
       patch 'update_basic_info'
       get 'attendances/edit_one_month'
       patch 'attendances/update_one_month'
-      get 'edit_overtime_request'
-      post 'update_overtime_request'
+      post 'update_show'
+      get 'show_month_reply'
+      post 'update_show_month_reply'
+      get 'show_confirmation'
     end
     resources :attendances, only: :update do
       member do
         get 'edit_overtime_request'
         post 'update_overtime_request'
+      end
+      collection do
+        get 'edit_overtime_reply'
+        post 'update_overtime_reply'
+        get 'edit_month_reply'
+        post 'update_month_reply'
+        get 'approved'
       end
     end
   end

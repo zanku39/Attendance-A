@@ -32,24 +32,21 @@ class AttendancesController < ApplicationController
   end
 
   def edit_one_month
-    #csv処理
-    respond_to do |format|
-      format.html do
-        #html用の処理を書く
-      end
-      format.csv do
-        #csv用の処理を書く
-        send_data render_to_string, filename: "当月分勤怠データ.csv", type: :csv
-      end
-    end
+    @superiors = User.where(superior: true).where.not(id: @user.id)
   end
   
   def update_one_month
     ActiveRecord::Base.transaction do # トランザクションを開始します。
       if attendances_invalid?
         attendances_params.each do |id, item|
-          attendance = Attendance.find(id)
-          attendance.update_attributes!(item)
+          if item[:tomorrow] == "0" && (item[:change_started_at] > item[:change_finished_at])
+            flash[:danger] = "出社よりも退社の時間が早い時間になっているところがあります。" 
+            redirect_to @user and return
+          elsif item[:change_started_at].present? && item[:change_finished_at].present? && item[:change_confirmation].present?
+            item[:change_status] = "申請中"
+            attendance = Attendance.find(id)
+            attendance.update_attributes!(item)
+          end
         end
         flash[:success] = "1ヶ月分の勤怠情報を更新しました。"
         redirect_to user_url(date: params[:date])
@@ -57,7 +54,7 @@ class AttendancesController < ApplicationController
         flash[:danger] = "無効な入力データがあった為、更新をキャンセルしました。"
         redirect_to attendances_edit_one_month_user_url(date: params[:date])
       end
-    end
+      end
   rescue ActiveRecord::RecordInvalid # トランザクションによるエラーの分岐です。
     flash[:danger] = "無効な入力データがあった為、更新をキャンセルしました。"
     redirect_to attendances_edit_one_month_user_url(date: params[:date])
@@ -66,19 +63,114 @@ class AttendancesController < ApplicationController
   def edit_overtime_request
     @user = User.find(params[:user_id])
     @attendance = @user.attendances.find(params[:id])
-    @superior = User.where(superior: true).where.not(id: @user.id)
+    @superiors = User.where(superior: true).where.not(id: @user.id)
   end
   
   def update_overtime_request
     @user = User.find(params[:user_id])
-    @attendance = @user.attendances.find(params[:id])
-    if @attendance.update_attributes(overtime_params)
-      flash[:success] = "残業申請しました。"
-    else
-      params[:attendance][:business_outline].blank? || params[:attendance][:confirmation].blank?
-      flash[:danger] = "残業申請に失敗しました。"
+    @attendance = Attendance.find(params[:id])
+    if params[:attendance][:scheduled_end_time].blank?
+      flash[:danger] = "終了予定時間を記入して下さい" 
+      redirect_to @user and return
+    elsif params[:attendance][:business_outline].blank?
+      flash[:danger] = "業務処理内容を記入して下さい。" 
+      redirect_to @user and return
+    elsif params[:attendance][:confirmation].blank?
+      flash[:danger] = "上長を選択して下さい。" 
+      redirect_to @user and return
     end
-    redirect_to @user
+      @attendance.update_attributes(overtime_params)
+      flash[:success] = "残業申請しました。"
+      redirect_to @user
+  end
+  
+  def edit_overtime_reply
+    @user = User.find(params[:user_id])
+    @attendances = Attendance.where(confirmation: current_user.name, status: "申請中").order(user_id: "ASC", worked_on: "ASC").group_by(&:user_id)
+  end
+  
+  def update_overtime_reply
+    r1 = 0
+    r2 = 0
+    r3 = 0
+    ActiveRecord::Base.transaction do
+        @user = User.find(params[:user_id])
+        #@attendances = Attendance.where(confirmation: current_user.name, status: "申請中").order(user_id: "ASC", worked_on: "ASC").group_by(&:user_id)
+        reply_params.each do |id, item|
+          if (item[:fix] == "1") && (item[:status] == "なし" || item[:status] == "承認" || item[:status] == "否認")
+          attendance = Attendance.find(id)
+            if item[:status] == "なし"
+              r1 += 1
+              attendance.scheduled_end_time = nil
+              attendance.business_outline = nil
+              item[:status] = nil
+            elsif item[:status] == "承認"
+              r2 += 1
+            elsif item[:status] == "否認"
+              r3 += 1
+            end
+            item[:fix] = "0"
+          attendance.update_attributes!(item)
+          end
+        end
+      end
+      flash[:success] = "残業申請の#{r1}件なし 承認#{r2}件承認 否認#{r3}件否認"
+      redirect_to user_url(@user)
+  rescue ActiveRecord::RecordInvalid
+    flash[:danger] = "無効な入力データがあった為、変更をキャンセルしました。"
+    redirect_to user_url(@user)
+  end
+  
+  def edit_month_reply
+    @user = User.find(params[:user_id])
+    @attendances = Attendance.where(change_confirmation: current_user.name, change_status: "申請中").order(user_id: "ASC", worked_on: "ASC").group_by(&:user_id)
+  end
+  
+  def update_month_reply
+    r1 = 0
+    r2 = 0
+    r3 = 0
+    ActiveRecord::Base.transaction do
+        @user = User.find(params[:user_id])
+        #@attendances = Attendance.where(change_confirmation: current_user.name, change_status: "申請中").order(user_id: "ASC", worked_on: "ASC").group_by(&:user_id)
+        attendances_reply.each do |id, item|
+          if (item[:fix] == "1") && (item[:change_status] == "なし" || item[:change_status] == "承認" || item[:change_status] == "否認")
+          attendance = Attendance.find(id)
+            if item[:change_status] == "なし"
+              r1 += 1
+              attendance.change_started_at = nil
+              attendance.change_finished_at = nil
+              attendance.note = nil
+              item[:change_status] = nil
+            elsif item[:change_status] == "承認"
+              r2 += 1
+              if attendance.before_started_at.blank?
+                attendance.before_started_at = attendance.started_at
+              end
+              if attendance.before_finished_at.blank?
+                attendance.before_finished_at = attendance.finished_at
+              end
+              attendance.started_at = attendance.change_started_at
+              attendance.finished_at = attendance.change_finished_at
+              attendance.change_date = Date.current
+            elsif item[:change_status] == "否認"
+              r3 += 1
+            end
+            item[:fix] = "0"
+          attendance.update_attributes!(item)
+          end
+          end
+      end
+      flash[:success] = "残業申請の#{r1}件なし 承認#{r2}件承認 否認#{r3}件否認"
+      redirect_to user_url(@user)
+  rescue ActiveRecord::RecordInvalid
+    flash[:danger] = "無効な入力データがあった為、変更をキャンセルしました。"
+    redirect_to user_url(@user)
+  end
+  
+  def approved
+    @user = User.find(params[:user_id])
+    @logs = @user.attendances.where(change_status: "承認").order(worked_on: "ASC")
   end
   
   private
@@ -86,13 +178,20 @@ class AttendancesController < ApplicationController
   
     # １ヶ月分の勤怠情報を扱います。
     def attendances_params
-      params.require(:user).permit(attendances: [:started_at, :finished_at, :note])[:attendances]
+      params.require(:user).permit(attendances: [:change_started_at, :change_finished_at, :tomorrow, :note, :change_confirmation, :change_status])[:attendances]
+    end
+    
+    def attendances_reply
+      params.require(:user).permit(attendances: [:change_status, :fix])[:attendances]
     end
     
     def overtime_params
-      params.require(:attendance).permit(:scheduled_end_time, :next_day, :business_outline, :confirmation)
+      params.require(:attendance).permit(:scheduled_end_time, :next_day, :business_outline, :confirmation, :status)
     end
     
+    def reply_params
+      params.require(:user).permit(attendances: [:status, :fix])[:attendances]
+    end
     
     # beforeフィルター
     

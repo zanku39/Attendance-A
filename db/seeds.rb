@@ -37,12 +37,12 @@ User.create!(name: "テスト",
              password_confirmation: "password")
              
              
-60.times do |n|
+3.times do |n|
   name = Faker::Name.name
   email = "sample-#{n+1}@email.com"
   affiliation = "フリーランス部"
-  employee_number = "#{n+1}"
-  uid = "#{n+1}"
+  employee_number = "#{n+5}"
+  uid = "#{n+5}"
   password = "password"
   User.create!(name: name,
                email: email,

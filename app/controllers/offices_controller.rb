@@ -2,7 +2,7 @@ class OfficesController < ApplicationController
   
   #before_action :set_user, only: [:new, :edit, :update, :destroy, :edit_basic_info, :update_basic_info]
   before_action :logged_in_user, only: [:index, :edit, :update, :destroy]
-  before_action :correct_user, only: [:edit, :update]
+  #before_action :correct_user, only: [:edit, :update, :index]
   before_action :admin_user, only: [:index, :destroy, :edit, :update]
 
   def index

@@ -3,11 +3,14 @@
     <%= link_to "勤怠システム", root_path, id: "logo" %>
     <nav>
       <ul class="nav navbar-nav navbar-right">
-        <li><%= link_to "トップへ", root_path %></li>
+        <li><%= link_to "トップへ", root_path, id: "head" %></li>
         <% if logged_in? %>
-          <li><%= link_to "ユーザー一覧", users_path %></li>
-          <li><%= link_to "出勤社員一覧", users_index1_path(current_user) %></li>
-          <li><%= link_to "拠点情報の確認", offices_path(current_user) %></li>
+          <% if current_user.admin? %>
+            <li><%= link_to "ユーザー一覧", users_path, id: "head" %></li>
+            <li><%= link_to "出勤社員一覧", users_index1_path(current_user), id: "head" %></li>
+            <li><%= link_to "拠点情報の確認", offices_path(current_user), id: "head" %></li>
+            <li><%= link_to "基本情報の修正", edit_basic_info_user_path(current_user), id: "head" %></li>
+          <% end %>
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
               アカウント <b class="caret"></b>

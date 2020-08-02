@@ -14,14 +14,26 @@ ActiveRecord::Schema.define(version: 20200605013135) do
 
   create_table "attendances", force: :cascade do |t|
     t.date "worked_on"
+    t.datetime "before_started_at"
+    t.datetime "before_finished_at"
     t.datetime "started_at"
     t.datetime "finished_at"
+    t.datetime "change_started_at"
+    t.datetime "change_finished_at"
     t.string "note"
-    t.integer "user_id"
     t.datetime "scheduled_end_time"
-    t.boolean "next_day", default: false
+    t.boolean "next_day"
+    t.boolean "tomorrow"
     t.string "business_outline"
     t.string "confirmation"
+    t.string "change_confirmation"
+    t.boolean "fix", default: false
+    t.string "status"
+    t.string "change_status"
+    t.date "change_date"
+    t.string "month_confirmation"
+    t.string "month_status"
+    t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_attendances_on_user_id"
@@ -45,12 +57,6 @@ ActiveRecord::Schema.define(version: 20200605013135) do
     t.time "basic_work_time", default: "2000-01-01 23:00:00"
     t.time "designated_work_start_time", default: "2000-01-01 00:00:00"
     t.time "designated_work_end_time", default: "2000-01-01 09:00:00"
-    t.datetime "scheduled_end_time"
-    t.string "business_outline"
-    t.string "confirmation"
-    t.datetime "over_time"
-    t.boolean "change"
-    t.string "work_confirmation"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "superior", default: false

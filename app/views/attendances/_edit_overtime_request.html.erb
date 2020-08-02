@@ -1,4 +1,5 @@
 <%= form_with(model: @attendance, url: update_overtime_request_user_attendance_path(@user, @attendance), local: true, method: :post) do |f| %>
+  <%= f.hidden_field :status, :value => "申請中" %>
   <div class="modal-dialog modal-lg modal-dialog-center">
     <div class="modal-content">
       <div class="modal-header">
@@ -31,16 +32,16 @@
                     <%= $days_of_the_week[@attendance.worked_on.wday] %>
                   <% end %>
                 </td>
-                <td><%= f.time_field :scheduled_end_time, :include => true, minute_step: 15, class: "form-control" %></td>
-                <td><%= f.check_box :next_day, class: "form-control" %></td>
+                <td><%= f.time_field :scheduled_end_time, class: "form-control" %></td>
+                <td><%= f.check_box :next_day %></td>
                 <td><%= f.text_field :business_outline, class: "form-controll" %></td>
-                <td><%= f.collection_select :confirmation, @superior, :name, :name, {include_blank: true}, {class: "form-control"} %></td>
+                <td><%= f.collection_select :confirmation, @superiors, :name, :name, {include_blank: true}, {class: "form-control"} %></td>
               </tbody>
             </table>
   
   
             <div class="center">
-              <%= f.submit "変更を送信する", class: "btn btn-lg btn-primary" %>
+              <%= f.submit "変更を送信する", class: "btn btn-block btn-primary btn-user" %>
             </div>
           </div>
         </div>
