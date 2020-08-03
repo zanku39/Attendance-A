@@ -40,7 +40,10 @@ class AttendancesController < ApplicationController
       if attendances_invalid?
         attendances_params.each do |id, item|
           if item[:tomorrow] == "0" && (item[:change_started_at] > item[:change_finished_at])
-            flash[:danger] = "出社よりも退社の時間が早い時間になっているところがあります。" 
+            flash[:danger] = "出社または退社の時間に問題のところがあります。" 
+            redirect_to @user and return
+          elsif item[:change_started_at].present? && item[:change_finished_at].blank? && (item[:change_started_at].blank? && item[:change_finished_at].present?)
+            flash[:danger] = "出社または退社の時間に問題のところがあります。" 
             redirect_to @user and return
           elsif item[:change_started_at].present? && item[:change_finished_at].present? && item[:change_confirmation].present?
             item[:change_status] = "申請中"

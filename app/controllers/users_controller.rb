@@ -4,6 +4,7 @@ class UsersController < ApplicationController
   before_action :correct_user, only: [:show, :edit, :update]
   before_action :admin_user, only: [:destroy, :edit_basic_info, :update_basic_info, :index, :index1,]
   before_action :set_one_month, only: :show
+  before_action :admin, only: :show
   
   def index
    if params[:search]
@@ -157,11 +158,11 @@ class UsersController < ApplicationController
   private
 
     def user_params
-      params.require(:user).permit(:name, :email, :affiliation, :password, :password_confirmation, :employee_number)
+      params.require(:user).permit(:name, :email, :affiliation, :employee_number, :uid, :password, :basic_work_time, :designated_work_start_time, :designated_work_end_time)
     end
     
     def basic_info_params
-      params.require(:user).permit(:affiliation, :basic_work_time, :designated_work_start_time, :designated_work_end_time)
+      params.require(:user).permit(:name, :email, :affiliation, :employee_number, :uid, :password, :basic_work_time, :designated_work_start_time, :designated_work_end_time)
     end
     
     def month_params
