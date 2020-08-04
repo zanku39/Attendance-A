@@ -32,7 +32,7 @@
                     <%= $days_of_the_week[@attendance.worked_on.wday] %>
                   <% end %>
                 </td>
-                <td><%= f.time_field :scheduled_end_time, class: "form-control" %></td>
+                <td><%= f.time_select :scheduled_end_time, :include_blank => true, :minute_step => 15, class: "form-control" %></td>
                 <td><%= f.check_box :next_day %></td>
                 <td><%= f.text_field :business_outline, class: "form-controll" %></td>
                 <td><%= f.collection_select :confirmation, @superiors, :name, :name, {include_blank: true}, {class: "form-control"} %></td>

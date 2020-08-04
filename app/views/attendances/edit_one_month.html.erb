@@ -23,20 +23,36 @@
               <td><%= l(day.worked_on, format: :short) %></td>
               <td><%= $days_of_the_week[day.worked_on.wday] %></td>
               <% if Date.current < day.worked_on %>
-                <td><%= attendance.time_field :change_started_at, readonly: true, class: "form-control" %></td>
-                <td><%= attendance.time_field :change_finished_at, readonly: true, class: "form-control" %></td>
+                <td><%= attendance.time_select :change_started_at, disabled: true, :include_blank => true, :minute_step => 15, class: "form-control" %></td>
+                <td><%= attendance.time_select :change_finished_at, disabled: true, :include_blank => true, :minute_step => 15,  class: "form-control" %></td>
               <% else %>
-                <td><%= attendance.time_field :change_started_at, class: "form-control" %></td>
-                <td><%= attendance.time_field :change_finished_at, class: "form-control" %></td>
+                <td><%= attendance.time_select :change_started_at, :include_blank => true, :minute_step => 15, class: "form-control" %></td>
+                <td><%= attendance.time_select :change_finished_at, :include_blank => true, :minute_step => 15, class: "form-control" %></td>
               <% end %>
-              <td><%= attendance.check_box :tomorrow %></td>
+              <td>
+                <% if Date.current < day.worked_on %>
+                  <%= attendance.check_box :tomorrow, disabled: 'disabled' %>
+                <% else %>
+                  <%= attendance.check_box :tomorrow %>
+                <% end %>
+              </td>
               <td>
                 <% if day.change_started_at.present? && day.change_finished_at.present? %>
                   <%= change_month(day.change_started_at, day.change_finished_at, day.tomorrow) %>
                 <% end %>
               </td>
+            <% if Date.current < day.worked_on %>
+              <td><%= attendance.text_field :note, readonly: true, class: "form-control" %></td>
+            <% else %>
               <td><%= attendance.text_field :note, class: "form-control" %></td>
-              <td><%= attendance.collection_select :change_confirmation, @superiors, :name, :name, {include_blank: true}, {class: "form-control"} %></td>
+            <% end %>
+              <td>
+                <% if Date.current < day.worked_on %>
+                  <%= attendance.collection_select :change_confirmation, @superiors, :name, :name, {include_blank: true}, disabled: true, class: "form-control" %>
+                <% else %>
+                  <%= attendance.collection_select :change_confirmation, @superiors, :name, :name, {include_blank: true}, class: "form-control" %>
+                <% end %>
+              </td>
             </tr>
           <% end %>
         <% end %>

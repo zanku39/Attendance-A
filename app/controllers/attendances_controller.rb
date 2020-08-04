@@ -38,26 +38,36 @@ class AttendancesController < ApplicationController
   def update_one_month
     ActiveRecord::Base.transaction do # トランザクションを開始します。
       if attendances_invalid?
+        n = 0
         attendances_params.each do |id, item|
-          if item[:tomorrow] == "0" && (item[:change_started_at] > item[:change_finished_at])
-            flash[:danger] = "出社または退社の時間に問題のところがあります。" 
-            redirect_to @user and return
-          elsif item[:change_started_at].present? && item[:change_finished_at].blank? && (item[:change_started_at].blank? && item[:change_finished_at].present?)
-            flash[:danger] = "出社または退社の時間に問題のところがあります。" 
-            redirect_to @user and return
-          elsif item[:change_started_at].present? && item[:change_finished_at].present? && item[:change_confirmation].present?
-            item[:change_status] = "申請中"
-            attendance = Attendance.find(id)
-            attendance.update_attributes!(item)
+          if item[:change_confirmation].present?
+            if (item["change_started_at(4i)"].blank? || item["change_started_at(5i)"].blank? || item["change_finished_at(4i)"].blank? || item["change_finished_at(5i)"].blank?)
+              flash[:danger] = "出社または退社の時間に問題のところがあります。" 
+              redirect_to @user and return
+            elsif item[:tomorrow] == "0" && ((item["change_started_at(4i)"] + item["change_started_at(5i)"]).to_i > (item["change_finished_at(4i)"] + item["change_finished_at(5i)"]).to_i)
+              flash[:danger] = "出社または退社の時間に問題のところがあります。" 
+              redirect_to @user and return
+              #(((item["change_started_at(4i)"] + item["change_started_at(5i)"]).to_i.blank?) && ((item["change_finished_at(4i)"] + item["change_finished_at(5i)"]).to_i.present?)))
+              # flash[:danger] = "出社または退社の時間に問題のところがあります。" 
+              # redirect_to @user and return
+            elsif (((item["change_started_at(4i)"] + item["change_started_at(5i)"]).to_i.present?) && ((item["change_finished_at(4i)"] + item["change_finished_at(5i)"]).to_i.present?)) && 
+              item[:change_confirmation].present?
+              item[:change_status] = "申請中"
+              attendance = Attendance.find(id)
+              attendance.update_attributes!(item)
+              n += 1
+            end
           end
         end
-        flash[:success] = "1ヶ月分の勤怠情報を更新しました。"
+        if n != 0
+          flash[:success] = "1ヶ月分の勤怠情報を更新しました。"
+        end
         redirect_to user_url(date: params[:date])
       else
         flash[:danger] = "無効な入力データがあった為、更新をキャンセルしました。"
         redirect_to attendances_edit_one_month_user_url(date: params[:date])
       end
-      end
+    end
   rescue ActiveRecord::RecordInvalid # トランザクションによるエラーの分岐です。
     flash[:danger] = "無効な入力データがあった為、更新をキャンセルしました。"
     redirect_to attendances_edit_one_month_user_url(date: params[:date])
@@ -72,7 +82,7 @@ class AttendancesController < ApplicationController
   def update_overtime_request
     @user = User.find(params[:user_id])
     @attendance = Attendance.find(params[:id])
-    if params[:attendance][:scheduled_end_time].blank?
+    if params[:attendance]["scheduled_end_time(4i)"].blank? && params[:attendance]["scheduled_end_time(5i)"].blank?
       flash[:danger] = "終了予定時間を記入して下さい" 
       redirect_to @user and return
     elsif params[:attendance][:business_outline].blank?
@@ -82,9 +92,12 @@ class AttendancesController < ApplicationController
       flash[:danger] = "上長を選択して下さい。" 
       redirect_to @user and return
     end
-      @attendance.update_attributes(overtime_params)
-      flash[:success] = "残業申請しました。"
-      redirect_to @user
+    params[:attendance][:scheduled_end_time] = Date.current.to_s +
+      params[:attendance]["scheduled_end_time(4i)"] + 
+      params[:attendance]["scheduled_end_time(5i)"]
+    @attendance.update_attributes(overtime_params)
+    flash[:success] = "残業申請しました。"
+    redirect_to @user
   end
   
   def edit_overtime_reply

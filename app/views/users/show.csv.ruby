@@ -9,12 +9,12 @@ CSV.generate do |csv|
         attendance.worked_on.strftime("%Y/%m/%d"),
         $days_of_the_week[attendance.worked_on.wday],
         if attendance.started_at.present?
-          attendance.started_at.strftime("%I:%M")
+          l(attendance.started_at.floor_to(60*15), format: :time)
         else
           ""
         end,
         if attendance.finished_at.present?
-          attendance.finished_at.strftime("%I:%M")
+          l(attendance.finished_at.floor_to(60*15), format: :time)
         else
           ""
         end
