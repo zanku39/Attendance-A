@@ -85,6 +85,12 @@ class AttendancesController < ApplicationController
     if params[:attendance]["scheduled_end_time(4i)"].blank? && params[:attendance]["scheduled_end_time(5i)"].blank?
       flash[:danger] = "終了予定時間を記入して下さい" 
       redirect_to @user and return
+    elsif (params[:attendance][:next_day] == "0") &&
+      ((params[:attendance]["scheduled_end_time(4i)"].to_i < @user.designated_work_start_time.hour) ||
+      ((params[:attendance]["scheduled_end_time(4i)"].to_i == @user.designated_work_start_time.hour) &&
+       (params[:attendance]["scheduled_end_time(5i)"].to_i < @user.designated_work_start_time.min)))
+      flash[:danger] = "終了予定時間が予定勤務開始時間より早い時間になってます。" 
+      redirect_to @user and return
     elsif params[:attendance][:business_outline].blank?
       flash[:danger] = "業務処理内容を記入して下さい。" 
       redirect_to @user and return

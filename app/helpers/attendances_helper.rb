@@ -38,7 +38,11 @@ module AttendancesHelper
       if next_day == true
         format("%.2f", ((((scheduled_end_time.hour - designated_work_end_time.hour)*60 + (scheduled_end_time.min - designated_work_end_time.min)) / 60.0) + 24))
       else
-        format("%.2f", ((((scheduled_end_time.hour - designated_work_end_time.hour)*60 + (scheduled_end_time.min - designated_work_end_time.min)) / 60.0)))
+        if scheduled_end_time.hour < 13
+          format("%.2f", ((((scheduled_end_time.hour - designated_work_end_time.hour)*60 + (scheduled_end_time.min - designated_work_end_time.min)) / 60.0) + 1))
+        else
+          format("%.2f", ((((scheduled_end_time.hour - designated_work_end_time.hour)*60 + (scheduled_end_time.min - designated_work_end_time.min)) / 60.0)))
+        end
       end
     end
   end
