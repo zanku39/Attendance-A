@@ -39,7 +39,7 @@
       <div>
         <% if @change_notices !=0 %>
           <%= link_to "【 勤怠変更申請のお知らせ 】", edit_month_reply_user_attendances_path(@user), remote: true, :style=>"color:red;" %>
-            <div class="superior"><b><%= @change_notices %>件の通知があります</div>
+            <div class="superior"><%= @change_notices %>件の通知があります</div>
           <% else %>
             <%= "【 勤怠変更申請のお知らせ 】" %> 
           <% end %>
@@ -53,7 +53,6 @@
         <% end %>  
       </div>
     <% end %>
-      </div>
 
 
 
