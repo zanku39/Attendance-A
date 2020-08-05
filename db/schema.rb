@@ -24,6 +24,7 @@ ActiveRecord::Schema.define(version: 20200605013135) do
     t.datetime "scheduled_end_time"
     t.boolean "next_day"
     t.boolean "tomorrow"
+    t.boolean "day_after"
     t.string "business_outline"
     t.string "confirmation"
     t.string "change_confirmation"

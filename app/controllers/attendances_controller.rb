@@ -166,6 +166,7 @@ class AttendancesController < ApplicationController
               if attendance.before_finished_at.blank?
                 attendance.before_finished_at = attendance.finished_at
               end
+              attendance.day_after = attendance.tomorrow
               attendance.started_at = attendance.change_started_at
               attendance.finished_at = attendance.change_finished_at
               attendance.change_date = Date.current

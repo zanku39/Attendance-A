@@ -12,6 +12,7 @@ class CreateAttendances < ActiveRecord::Migration[5.1]
       t.datetime :scheduled_end_time #終了予定時間
       t.boolean :next_day #翌日
       t.boolean :tomorrow #翌日
+      t.boolean :day_after #翌日
       t.string :business_outline #業務処理内容
       t.string :confirmation #残業申請用指示者確認（上長）
       t.string :change_confirmation #変更用指示者確認（上長)
